@@ -19,6 +19,7 @@
   )
 
 (defn unvisited-neighbours [x y maze]
-  (for [neighbour (neighbours x y)]
-    :when (> 0 (y (x maze))))
+  (for [neighbour (neighbours x y)
+    :when (> 0 (y (x maze)))]
+    [x y])
   )
