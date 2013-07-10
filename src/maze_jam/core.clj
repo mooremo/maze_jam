@@ -18,7 +18,8 @@
 
 (def maze (make-maze-template 3 5))     ;
 
-(defn unvisited-neighbors [x y maze]
+(defn unvisited-neighbors
+  [[x y] maze]
   (for [neighbor (neighbors x y maze)
     :when (= 0 ((maze y) x))]
     neighbor))
@@ -44,20 +45,22 @@
        (update-in [y2 x2] + (bore [x2 y2] [x1 y1]))))
 
 (defn step
-  [current maze visited-cells]
-  (let [next-cell (random-from (unvisited-neighbors current))
-        new-maze (carve current next-cell)]
-    (if next-cell
-      (step next-cell new-maze (conj visited-cells current))
-      ;; 
-    )
-
-    ))
-
+  [maze visited-cells]
+  (if (empty? visited-cells)
+    maze
+    (let [current (first visited-cells)
+          unvisited (unvisited-neighbors current maze)]
+      (if (empty? unvisited)
+        (recur maze (rest visited-cells))
+        (let [next-cell (rand-nth unvisited)
+              new-maze (carve current next-cell maze)
+              new-visited (conj visited-cells (rand-nth unvisited))]
+          (recur new-maze new-visited))))))
 
 (defn gen-maze
-  (step [0 0] (make-maze-template) []))
+  [w h]
+  (step (make-maze-template w h) '([0 0])))
 
 (comment
-  (carve [1 1] [1 2] maze)                ;[[0 0 0] [0 2 0] [0 1 0] [0 0 0] [0 0 0]]
+  (gen-maze 5 5)
 )
