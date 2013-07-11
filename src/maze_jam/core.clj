@@ -1,4 +1,5 @@
-(ns maze-jam.core)
+(ns maze-jam.core
+  (:require [maze-jam.client :as client]))
 
 (defn make-maze-template [width height]
   (vec (for [x (range height)]
@@ -20,9 +21,9 @@
 
 (defn unvisited-neighbors
   [[x y] maze]
-  (for [neighbor (neighbors x y maze)
-    :when (= 0 ((maze y) x))]
-    neighbor))
+  (for [[nx ny] (neighbors x y maze)
+    :when (= 0 (get-in maze [ny nx]))]
+    [nx ny]))
 
 (def mask
   {:north 1
@@ -54,13 +55,15 @@
         (recur maze (rest visited-cells))
         (let [next-cell (rand-nth unvisited)
               new-maze (carve current next-cell maze)
-              new-visited (conj visited-cells (rand-nth unvisited))]
+              new-visited (conj visited-cells next-cell)]
+          
           (recur new-maze new-visited))))))
 
 (defn gen-maze
   [w h]
-  (step (make-maze-template w h) '([0 0])))
+  (-> (step (make-maze-template w h) '([0 0]))
+      client/maze->png
+      client/write-file))
 
 (comment
-  (gen-maze 5 5)
-)
+  (gen-maze 5 5))
